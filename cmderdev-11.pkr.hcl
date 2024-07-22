@@ -39,7 +39,7 @@ variable "memory" {
 
 variable "vm_name" {
   type    = string
-  default = "cmderdev"
+  default = "cmderdev-11"
 }
 
 variable "windows_version_major" {
@@ -74,14 +74,42 @@ variable "iso_checksum" {
   default = "sha256:c8dbc96b61d04c8b01faf6ce0794fdf33965c7b350eaa3eb1e6697019902945c"
 }
 
+
 variable "vagrant_box" {
   type = string
 }
 
+source "parallels-iso" "cmderdev-11-amd64" {
+  boot_command           = ""
+  boot_wait              = "6m"
+  communicator           = "winrm"
+  cpus                   = "${var.cpus}"
+  disk_size              = "${var.disk_size}"
+  floppy_files         = [
+    "provision-autounattend.ps1",
+    "provision-openssh.ps1",
+    "provision-psremoting.ps1",
+    "provision-pwsh.ps1",
+    "provision-winrm.ps1",
+    "tmp/windows-11-23h2/autounattend.xml",
+  ]
+  guest_os_type          = "win-10"
+  iso_checksum           = "${var.iso_checksum}"
+  iso_url                = "${var.iso_url}"
+  memory                 = "${var.memory}"
+  parallels_tools_flavor = "win"
+  prlctl                 = [["set", "{{ .Name }}", "--efi-boot", "off"]]
+  shutdown_command       = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
+  vm_name                = "${var.vm_name}"
+  winrm_password         = "vagrant"
+  winrm_timeout          = "${var.winrm_timeout}"
+  winrm_username         = "vagrant"
+}
+
 source "virtualbox-iso" "cmderdev-11-amd64" {
-  boot_wait            = "1m"
+  boot_wait            = "-1s"
   communicator         = "winrm"
-  cpus                 = 2
+  cpus                 = "${var.cpus}"
   disk_size            = "${var.disk_size}"
   floppy_files         = [
     "provision-autounattend.ps1",
@@ -91,6 +119,7 @@ source "virtualbox-iso" "cmderdev-11-amd64" {
     "provision-winrm.ps1",
     "tmp/windows-11-23h2/autounattend.xml",
   ]
+
   guest_additions_mode = "disable"
   guest_os_type        = "Windows10_64"
   headless             = "${var.headless}"
@@ -107,7 +136,7 @@ source "virtualbox-iso" "cmderdev-11-amd64" {
 source "vmware-iso" "cmderdev-11-amd64" {
   boot_wait         = "1m"
   communicator      = "winrm"
-  cpus              = 2
+  cpus              = "${var.cpus}"
   disk_adapter_type = "lsisas1068"
   disk_size         = "${var.disk_size}"
   disk_type_id      = "${var.disk_type_id}"
@@ -126,7 +155,7 @@ source "vmware-iso" "cmderdev-11-amd64" {
   memory            = "${var.memory}"
   shutdown_command  = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
   version           = "${var.vmx_version}"
-  vm_name              = "${var.vm_name}-${var.windows_version_major}"
+  vm_name           = "${var.vm_name}"
   vmx_data = {
     "RemoteDisplay.vnc.enabled" = "false"
     "RemoteDisplay.vnc.port"    = "5900"
@@ -187,15 +216,11 @@ build {
   }
 
   provisioner "powershell" {
-
+    use_pwsh = true
     scripts = [
       "vm-guest-tools.ps1",
       "example/provision-chocolatey.ps1",
       "provision-cmderdev.ps1"
-    ]
-    only     = [
-      "virtualbox-iso.cmderdev-11",
-      "vmware-iso.cmderdev-11"
     ]
   }
 
