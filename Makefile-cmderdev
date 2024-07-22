@@ -1,0 +1,137 @@
+# Disable builtin rules and variables since they aren't used
+# This makes the output of "make -d" much easier to follow and speeds up evaluation
+# NB you can use make --print-data-base --dry-run to troubleshoot this Makefile.
+MAKEFLAGS+= --no-builtin-rules
+MAKEFLAGS+= --no-builtin-variables
+
+# uncomment the next two lines to use the local development version of the
+# windows-update packer plugin. you probably want to change the path too.
+#export PACKER_CONFIG_DIR:= $(HOME)/Projects/packer-plugin-windows-update/dist/test
+#export PACKER_PLUGIN_PATH:= $(HOME)/Projects/packer-plugin-windows-update/dist/test/plugins
+
+# libvirt images.
+IMAGES+= cmderdev-10
+IMAGES+= cmderdev-11
+
+# Virtualbox images.
+VIRTUALBOX_IMAGES+= cmderdev-10
+VIRTUALBOX_IMAGES+= cmderdev-11
+
+# VMWare Workstation images.
+VMWARE_IMAGES+= cmderdev-10
+VMWARE_IMAGES+= cmderdev-11
+
+# Generate the build-* targets.
+LIBVIRT_BUILDS= $(addsuffix -libvirt,$(addprefix build-,$(IMAGES)))
+VIRTUALBOX_BUILDS= $(addsuffix -virtualbox,$(addprefix build-,$(VIRTUALBOX_IMAGES)))
+VMWARE_BUILDS= $(addsuffix -vmware,$(addprefix build-,$(VMWARE_IMAGES)))
+
+.PHONY: help always $(LIBVIRT_BUILDS) $(VIRTUALBOX_BUILDS) $(VMWARE_BUILDS)
+
+help:
+	@echo Type one of the following commands to build a specific windows box.
+	@echo
+	@echo libvirt targets:
+	@$(addprefix echo make ,$(addsuffix ;,$(LIBVIRT_BUILDS)))
+	@echo
+	@echo Virtualbox targets:
+	@$(addprefix echo make ,$(addsuffix ;,$(VIRTUALBOX_BUILDS)))
+	@echo
+	@echo VMWare Workstation targets:
+	@$(addprefix echo make ,$(addsuffix ;,$(VMWARE_BUILDS)))
+
+# Target specific pattern rules for build-* targets.
+$(LIBVIRT_BUILDS): build-%-libvirt: %-amd64-libvirt.box
+$(VIRTUALBOX_BUILDS): build-%-virtualbox: %-amd64-virtualbox.box
+$(VMWARE_BUILDS): build-%-vmware: %-amd64-vmware.box
+
+%-amd64-libvirt.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1 drivers
+	rm -f $@
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-libvirt-packer-init.log \
+		packer init $*.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-libvirt-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=qemu.$*-amd64 -on-error=abort $*.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-amd64-libvirt-packer.log \
+		>$*-amd64-libvirt-windows-updates.log
+	@./box-metadata.sh libvirt $*-amd64 $@
+
+%-uefi-amd64-libvirt.box: %-uefi.pkr.hcl tmp/%-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
+	rm -f $@
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-libvirt-packer-init.log \
+		packer init $*-uefi.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-libvirt-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=qemu.$*-uefi-amd64 -on-error=abort $*-uefi.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-uefi-amd64-libvirt-packer.log \
+		>$*-uefi-amd64-libvirt-windows-updates.log
+	@./box-metadata.sh libvirt $*-uefi-amd64 $@
+
+%-amd64-virtualbox.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1
+	rm -f $@
+	sed -E 's,<Path>A:\\</Path>,<Path>D:\\</Path>,g' -i tmp/$*/autounattend.xml
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtualbox-packer-init.log \
+		packer init $*.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtualbox-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=virtualbox-iso.$*-amd64 -on-error=abort $*.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-amd64-virtualbox-packer.log \
+		>$*-amd64-virtualbox-windows-updates.log
+	@./box-metadata.sh virtualbox $*-amd64 $@
+
+%-uefi-amd64-virtualbox.box: %-uefi.pkr.hcl tmp/%-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
+	rm -f $@
+	sed -E 's,<Path>A:\\</Path>,<Path>D:\\</Path>,g' -i tmp/$*-uefi/autounattend.xml
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-virtualbox-packer-init.log \
+		packer init $*-uefi.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-virtualbox-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=virtualbox-iso.$*-uefi-amd64 -on-error=abort $*-uefi.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-uefi-amd64-virtualbox-packer.log \
+		>$*-uefi-amd64-virtualbox-windows-updates.log
+
+%-amd64-vmware.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1
+	rm -f $@
+	sed -E 's,<Path>A:\\</Path>,<Path>D:\\</Path>,g' -i tmp/$*/autounattend.xml
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-vmware-packer-init.log \
+		packer init $*.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-vmware-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=vmware-iso.$*-amd64 -on-error=abort $*.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-amd64-vmware-packer.log \
+		>$*-amd64-vmware-windows-updates.log
+	@./box-metadata.sh vmware $*-amd64 $@
+
+%-uefi-amd64-vmware.box: %-uefi.pkr.hcl tmp/%-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
+	rm -f $@
+	sed -E 's,<Path>A:\\</Path>,<Path>D:\\</Path>,g' -i tmp/$*-uefi/autounattend.xml
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-vmware-packer-init.log \
+		packer init $*-uefi.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-vmware-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=vmware-iso.$*-uefi-amd64 -on-error=abort $*-uefi.pkr.hcl
+	./get-windows-updates-from-packer-log.sh \
+		$*-uefi-amd64-vmware-packer.log \
+		>$*-uefi-amd64-vmware-windows-updates.log
+
+tmp/%/autounattend.xml: %/autounattend.xml always
+	mkdir -p "$$(dirname $@)"
+	cp -f $< $@
+	if [ -n '${PKR_VAR_windows_product_key}' ]; then \
+		sed -E 's,<!--<Key>.+</Key>-->,<Key>${PKR_VAR_windows_product_key}</Key>,g' -i $@; \
+	fi
+
+drivers:
+	rm -rf drivers.tmp
+	mkdir -p drivers.tmp
+	@# see https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html
+	@# see https://github.com/virtio-win/virtio-win-guest-tools-installer
+	@# see https://github.com/virtio-win/virtio-win-pkg-scripts
+	wget -P drivers.tmp https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.248-1/virtio-win-0.1.248.iso
+	7z x -odrivers.tmp drivers.tmp/virtio-win-*.iso
+	@# see https://github.com/virtio-win/virtio-win-guest-tools-installer/issues/25
+	@# see https://github.com/virtio-win/virtio-win-pkg-scripts/issues/76#issuecomment-2103185076
+	wget -O drivers.tmp/spice-guest-tools.exe https://www.spice-space.org/download/windows/spice-guest-tools/spice-guest-tools-0.141/spice-guest-tools-0.141.exe
+	mv drivers.tmp drivers
+
+clean:
+	rm -rf *.log *.box
