@@ -30,10 +30,12 @@ VSPHERE_IMAGES+= windows-2022
 VSPHERE_IMAGES+= windows-2022-uefi
 
 # Virtualbox images.
+VIRTUALBOX_IMAGES+= cmderdev-10-uefi
 VIRTUALBOX_IMAGES+= cmderdev-11
 VIRTUALBOX_IMAGES+= cmderdev-11-uefi
 
 # VMWare Workstation images.
+VMWARE_IMAGES+= cmderdev-10-uefi
 VMWARE_IMAGES+= cmderdev-11
 VMWARE_IMAGES+= cmderdev-11-uefi
 
