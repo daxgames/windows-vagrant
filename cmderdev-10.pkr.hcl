@@ -22,6 +22,11 @@ packer {
 }
 
 # ===================================================================================
+variable "cpus" {
+  type    = string
+  default = "2"
+}
+
 variable "disk_type_id" {
   type    = string
   default = "1"
@@ -66,7 +71,7 @@ variable "disk_size" {
 
 variable "iso_url" {
   type    = string
-  default = "./iso/Windows_10.iso"
+  default = "./iso/Win10_22H2_English_x64v1.iso"
 }
 
 variable "iso_checksum" {
@@ -133,7 +138,6 @@ source "virtualbox-iso" "cmderdev-10-amd64" {
     "provision-winrm.ps1",
     "tmp/windows-11-23h2/autounattend.xml",
   ]
-  firmware             = "efi"
   guest_additions_mode = "disable"
   guest_os_type        = "Windows10_64"
   headless             = "${var.headless}"
@@ -147,7 +151,7 @@ source "virtualbox-iso" "cmderdev-10-amd64" {
   winrm_username       = "vagrant"
 }
 
-source "vmware-iso" "cmderdev-11-amd64" {
+source "vmware-iso" "cmderdev-10-amd64" {
   boot_wait         = "1m"
   communicator      = "winrm"
   cpus              = "${var.cpus}"
@@ -173,7 +177,6 @@ source "vmware-iso" "cmderdev-11-amd64" {
   vmx_data = {
     "RemoteDisplay.vnc.enabled" = "false"
     "RemoteDisplay.vnc.port"    = "5900"
-    firmware                    = "efi"
   }
   vmx_remove_ethernet_interfaces = true
   vnc_port_max                   = 5980

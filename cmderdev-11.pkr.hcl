@@ -58,6 +58,10 @@ variable "winrm_timeout" {
 }
 
 # ===================================================================================
+variable "cpus" {
+  type    = string
+  default = "2"
+}
 
 variable "disk_size" {
   type    = string
