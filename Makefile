@@ -31,15 +31,11 @@ VSPHERE_IMAGES+= windows-2022-uefi
 
 # Virtualbox images.
 VIRTUALBOX_IMAGES+= cmderdev-10
-VIRTUALBOX_IMAGES+= cmderdev-10-uefi
 VIRTUALBOX_IMAGES+= cmderdev-11
-VIRTUALBOX_IMAGES+= cmderdev-11-uefi
 
 # VMWare Workstation images.
 VMWARE_IMAGES+= cmderdev-10
-VMWARE_IMAGES+= cmderdev-10-uefi
 VMWARE_IMAGES+= cmderdev-11
-VMWARE_IMAGES+= cmderdev-11-uefi
 
 # Generate the build-* targets.
 LIBVIRT_BUILDS= $(addsuffix -libvirt,$(addprefix build-,$(IMAGES)))
@@ -77,7 +73,7 @@ $(LIBVIRT_BUILDS): build-%-libvirt: %-amd64-libvirt.box
 $(PROXMOX_BUILDS): build-%-proxmox: %-amd64-proxmox.box
 $(HYPERV_BUILDS): build-%-hyperv: %-amd64-hyperv.box
 $(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
-$(VIRTUALBOX_BUILDS): build-%virtualbox: %-amd64-virtualbox.box
+$(VIRTUALBOX_BUILDS): build-%-virtualbox: %-amd64-virtualbox.box
 $(VMWARE_BUILDS): build-%-vmware: %-amd64-vmware.box
 
 %-amd64-libvirt.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1 drivers
@@ -211,17 +207,17 @@ tmp/%/autounattend.xml: %/autounattend.xml always
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-uefi-amd64 $@
 
-%-amd64-virtaulbox.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1
+%-amd64-virtualbox.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1
 	rm -f $@
 	sed -E 's,<Path>A:\\</Path>,<Path>D:\\</Path>,g' -i tmp/$*/autounattend.xml
-	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtaulbox-packer-init.log \
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtualbox-packer-init.log \
 		packer init $*.pkr.hcl
-	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtaulbox-packer.log PKR_VAR_vagrant_box=$@ \
-		packer build -only=virtaulbox-iso.$*-amd64 -on-error=abort $*.pkr.hcl
+	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtualbox-packer.log PKR_VAR_vagrant_box=$@ \
+		packer build -only=virtualbox-iso.$*-amd64 -on-error=abort $*.pkr.hcl
 	./get-windows-updates-from-packer-log.sh \
-		$*-amd64-virtaulbox-packer.log \
-		>$*-amd64-virtaulbox-windows-updates.log
-	@./box-metadata.sh virtaulbox $*-amd64 $@
+		$*-amd64-virtualbox-packer.log \
+		>$*-amd64-virtualbox-windows-updates.log
+	@./box-metadata.sh virtualbox $*-amd64 $@
 
 %-amd64-vmware.box: %.pkr.hcl tmp/%/autounattend.xml Vagrantfile.template *.ps1
 	rm -f $@
