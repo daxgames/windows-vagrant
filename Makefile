@@ -229,7 +229,7 @@ tmp/%/autounattend.xml: %/autounattend.xml always
 	./get-windows-updates-from-packer-log.sh \
 		$*-amd64-vmware-packer.log \
 		>$*-amd64-vmware-windows-updates.log
-	@./box-metadata.sh vmware $*-amd64 $@
+	@./box-metadata.sh vmware_desktop $*-amd64 $@
 
 %-uefi-amd64-virtualbox.box: %-uefi.pkr.hcl tmp/%-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
 	rm -f $@
@@ -252,6 +252,7 @@ tmp/%/autounattend.xml: %/autounattend.xml always
 	./get-windows-updates-from-packer-log.sh \
 		$*-uefi-amd64-vmware-packer.log \
 		>$*-uefi-amd64-vmware-windows-updates.log
+	@./box-metadata.sh vmware_desktop $*-amd64 $@
 
 drivers:
 	rm -rf drivers.tmp
