@@ -131,7 +131,7 @@ source "virtualbox-iso" "cmderdev-11-amd64" {
   iso_url              = "${var.iso_url}"
   memory               = "${var.memory}"
   shutdown_command     = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
-  vm_name              = "${var.vm_name}-${var.windows_version_major}"
+  vm_name              = "${var.vm_name}"
   winrm_password       = "vagrant"
   winrm_timeout        = "${var.winrm_timeout}"
   winrm_username       = "vagrant"

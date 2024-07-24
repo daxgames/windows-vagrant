@@ -66,15 +66,27 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "cmderdev-11" do |cmderdev|
-    cmderdev.vm.box = "cmderdev-11-amd64"
+  config.vm.define "cmderdev-11-vb" do |cmderdev|
+    cmderdev.vm.box = "cmderdev-11-amd64-virtualbox"
     # cmderdev.vm.box_version = "0.0.0"
-    # cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
+    cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
+
+    cmderdev.vm.provider "virtualbox" do |v|
+      v.gui = true
+      config.vm.network "public_network"
+    end
+
+    # cmderdev.vm.provision "shell", inline: $script_cmder
+    cmderdev.vm.provision "shell", inline: $script_cmderdev
+  end
+
+  config.vm.define "cmderdev-11" do |cmderdev|
+    cmderdev.vm.box = "cmderdev-11-amd64-vmware"
+    # cmderdev.vm.box_version = "0.0.0"
+    cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
 
     cmderdev.vm.provider "vmware_desktop" do |v|
       v.gui = true
-      # config.vm.network "public_network", bridge: 'wlan1', :adapter=>2 , type: "dhcp"
-      # config.vm.network "public_network", adapter: 0, auto_config: false
       config.vm.network "public_network"
     end
 

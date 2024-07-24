@@ -36,15 +36,15 @@ Add-Type -A System.IO.Compression.FileSystem
 
 # install Guest Additions.
 $systemVendor = (Get-CimInstance -ClassName Win32_ComputerSystemProduct -Property Vendor).Vendor
-if ($systemVendor -eq 'QEMU') {
-    # do nothing. this was installed in provision-guest-tools-qemu-kvm.ps1.
-} elseif ($systemVendor -eq 'Microsoft Corporation') {
-    # do nothing. Hyper-V enlightments are already bundled with Windows.
-} elseif ($systemVendor -eq 'VMware, Inc.') {
-    # do nothing. VMware Tools were already installed by provision-vmtools.ps1 (executed from autounattend.xml).
-} else {
-    throw "Cannot install Guest Additions: Unsupported system ($systemVendor)."
-}
+# if ($systemVendor -eq 'QEMU') {
+#     # do nothing. this was installed in provision-guest-tools-qemu-kvm.ps1.
+# } elseif ($systemVendor -eq 'Microsoft Corporation') {
+#     # do nothing. Hyper-V enlightments are already bundled with Windows.
+# } elseif ($systemVendor -eq 'VMware, Inc.') {
+#     # do nothing. VMware Tools were already installed by provision-vmtools.ps1 (executed from autounattend.xml).
+# } else {
+#     throw "Cannot install Guest Additions: Unsupported system ($systemVendor)."
+# }
 
 Write-Host 'Setting the vagrant account properties...'
 # see the ADS_USER_FLAG_ENUM enumeration at https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx
