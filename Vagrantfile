@@ -26,7 +26,19 @@ SCRIPT
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
+required_plugins.each do |plugin|
+# required_plugins = %w( vagrant-vbguest )
+#   unless Vagrant.has_plugin? plugin
+#     system "vagrant plugin install #{plugin}"
+#     p "Run 'vagrant up' again to continue."
+#     exit 0
+#   end
+# end
+
 Vagrant.configure("2") do |config|
+  # config.vbguest.iso_path = "../../../../usr/share/virtualbox/VBoxGuestAdditions.iso"
+  # config.vbguest.allow_downgrade = true
+
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
@@ -66,17 +78,37 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "cmderdev-11-vb" do |cmderdev|
-    cmderdev.vm.box = "cmderdev-11-amd64-virtualbox"
-    # cmderdev.vm.box_version = "0.0.0"
-    cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
+  config.vm.define "cmderdev-10-virtualbox" do |cmderdev|
+    cmderdev.vm.box = "cmderdev-10-amd64"
 
     cmderdev.vm.provider "virtualbox" do |v|
       v.gui = true
-      config.vm.network "public_network"
+      # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "cmderdev-10"]
+      v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
+      v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
     end
 
-    # cmderdev.vm.provision "shell", inline: $script_cmder
+    cmderdev.vm.provision "shell", inline: $script_cmder
+    cmderdev.vm.provision "shell", inline: $script_cmderdev
+  end
+
+  config.vm.define "cmderdev-11-virtualbox" do |cmderdev|
+    cmderdev.vm.box = "cmderdev-11-amd64"
+
+    cmderdev.vm.provider "virtualbox" do |v|
+      v.gui = true
+      # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "cmderdev-10"]
+      v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
+      v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+    end
+
+    cmderdev.vm.provision "shell", inline: $script_cmder
     cmderdev.vm.provision "shell", inline: $script_cmderdev
   end
 

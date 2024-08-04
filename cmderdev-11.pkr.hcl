@@ -95,7 +95,7 @@ source "parallels-iso" "cmderdev-11-amd64" {
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-11/autounattend.xml",
   ]
   guest_os_type          = "win-10"
   iso_checksum           = "${var.iso_checksum}"
@@ -121,7 +121,7 @@ source "virtualbox-iso" "cmderdev-11-amd64" {
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-11/autounattend.xml",
   ]
 
   guest_additions_mode = "disable"
@@ -150,7 +150,7 @@ source "vmware-iso" "cmderdev-11-amd64" {
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-11/autounattend.xml",
   ]
   guest_os_type     = "windows9-64"
   headless          = "${var.headless}"
