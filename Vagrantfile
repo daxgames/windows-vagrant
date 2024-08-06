@@ -26,14 +26,19 @@ SCRIPT
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
+required_plugins = %w( vagrant-vbguest vagrant-vmware-desktop vagrant-reload )
+restart_plugin = false
 required_plugins.each do |plugin|
-# required_plugins = %w( vagrant-vbguest )
-#   unless Vagrant.has_plugin? plugin
-#     system "vagrant plugin install #{plugin}"
-#     p "Run 'vagrant up' again to continue."
-#     exit 0
-#   end
-# end
+  unless Vagrant.has_plugin? plugin
+    system "vagrant plugin install #{plugin}"
+    restart_plugin = true
+  end
+
+  if restart_plugin
+    p "Run 'vagrant up' again to continue."
+    exit 0
+  end
+end
 
 Vagrant.configure("2") do |config|
   # config.vbguest.iso_path = "../../../../usr/share/virtualbox/VBoxGuestAdditions.iso"
@@ -113,16 +118,15 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "cmderdev-11" do |cmderdev|
-    cmderdev.vm.box = "cmderdev-11-amd64-vmware"
-    # cmderdev.vm.box_version = "0.0.0"
+    cmderdev.vm.box = "cmderdev-11-amd64"
     cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
+    # cmderdev.vm.box_version = "0.0.0"
 
     cmderdev.vm.provider "vmware_desktop" do |v|
       v.gui = true
-      config.vm.network "public_network"
     end
 
-    # cmderdev.vm.provision "shell", inline: $script_cmder
+    cmderdev.vm.provision "shell", inline: $script_cmder
     cmderdev.vm.provision "shell", inline: $script_cmderdev
   end
   # Disable automatic box update checking. If you disable this, then
