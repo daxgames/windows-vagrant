@@ -49,7 +49,7 @@ variable "windows_version_major" {
 
 variable "vmx_version" {
   type    = string
-  default = "14"
+  default = "21"
 }
 
 variable "winrm_timeout" {
