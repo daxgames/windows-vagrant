@@ -92,7 +92,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "cmderdev-10"]
       v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
-      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--memory", 4096]
       v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
     end
 
@@ -109,17 +109,18 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "cmderdev-10"]
       v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
-      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--memory", 4096]
       v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      v.customize ["modifyvm", :id, "--vram", "128"]
     end
 
     cmderdev.vm.provision "shell", inline: $script_cmder
     cmderdev.vm.provision "shell", inline: $script_cmderdev
   end
 
-  config.vm.define "cmderdev-11" do |cmderdev|
+  config.vm.define "cmderdev-11-vmware" do |cmderdev|
     cmderdev.vm.box = "cmderdev-11-amd64"
-    cmderdev.vm.network "public_network", bridge: 'wlan0', :adapter=>2 , type: "dhcp"
+    cmderdev.vm.network "public_network", bridge: 'wlan0', type: "dhcp"
     # cmderdev.vm.box_version = "0.0.0"
 
     cmderdev.vm.provider "vmware_desktop" do |v|
