@@ -11,13 +11,14 @@ choco install -y --force 7zip 7zip.install
 $env:path = "$env:path;c:\\tools\\cmder\\vendor\\git-for-windows\\cmd"
 c:
 cd \\Users\\Vagrant
-git clone https://github.com/cmderdev/cmder cmderdev
+git clone https://github.com/daxgames/cmder cmderdev
 TAKEOWN /F c:\\Users\\vagrant\\cmderdev /R /D y /s localhost /u vagrant /p vagrant
 cd cmderdev
 git remote add upstream  https://github.com/cmderdev/cmder
-git pull upstream master
+# git pull upstream master
+git checkout development-dax
 
-# cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
+cmd.exe "/K" '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" && powershell -command "& ''c:\\Users\\Vagrant\\cmderdev\\scripts\\build.ps1'' -verbose -compile" && exit'
 # copy c:\\Users\\Vagrant\\cmderdev\\launcher\\x64\\release\\cmder.exe c:\\Users\\Vagrant\\cmderdev
 SCRIPT
 
@@ -33,11 +34,11 @@ required_plugins.each do |plugin|
     system "vagrant plugin install #{plugin}"
     restart_plugin = true
   end
+end
 
-  if restart_plugin
-    p "Run 'vagrant up' again to continue."
-    exit 0
-  end
+if restart_plugin
+  p "Run 'vagrant up' again to continue."
+  exit 0
 end
 
 Vagrant.configure("2") do |config|
@@ -106,7 +107,7 @@ Vagrant.configure("2") do |config|
     cmderdev.vm.provider "virtualbox" do |v|
       v.gui = true
       # v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--name", "cmderdev-10"]
+      v.customize ["modifyvm", :id, "--name", "cmderdev-11"]
       v.customize ["modifyvm", :id, "--ostype", "Windows10_64"]
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
       v.customize ["modifyvm", :id, "--memory", 4096]

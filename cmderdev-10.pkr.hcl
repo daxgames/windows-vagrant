@@ -22,11 +22,6 @@ packer {
 }
 
 # ===================================================================================
-variable "cpus" {
-  type    = string
-  default = "2"
-}
-
 variable "disk_type_id" {
   type    = string
   default = "1"
@@ -63,6 +58,10 @@ variable "winrm_timeout" {
 }
 
 # ===================================================================================
+variable "cpus" {
+  type    = string
+  default = "2"
+}
 
 variable "disk_size" {
   type    = string
@@ -71,7 +70,7 @@ variable "disk_size" {
 
 variable "iso_url" {
   type    = string
-  default = "./iso/Win10_22H2_English_x64v1.iso"
+  default = "./iso/win10x64.iso"
 }
 
 variable "iso_checksum" {
@@ -79,20 +78,6 @@ variable "iso_checksum" {
   default = "none"
 }
 
-variable "vhv_enable" {
-  type    = string
-  default = "false"
-}
-
-variable "virtio_win_iso" {
-  type    = string
-  default = "~/virtio-win.iso"
-}
-
-variable "restart_timeout" {
-  type    = string
-  default = "5m"
-}
 
 variable "vagrant_box" {
   type = string
@@ -110,7 +95,7 @@ source "parallels-iso" "cmderdev-10-amd64" {
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-10/autounattend.xml",
   ]
   guest_os_type          = "win-10"
   iso_checksum           = "${var.iso_checksum}"
@@ -136,7 +121,7 @@ source "virtualbox-iso" "cmderdev-10-amd64" {
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-10/autounattend.xml",
   ]
   guest_additions_mode = "disable"
   guest_os_type        = "Windows10_64"
@@ -157,14 +142,14 @@ source "vmware-iso" "cmderdev-10-amd64" {
   cpus              = "${var.cpus}"
   disk_adapter_type = "lsisas1068"
   disk_size         = "${var.disk_size}"
-  disk_type_id      = "1"
+  disk_type_id      = "${var.disk_type_id}"
   floppy_files      = [
     "provision-autounattend.ps1",
     "provision-openssh.ps1",
     "provision-psremoting.ps1",
     "provision-pwsh.ps1",
     "provision-winrm.ps1",
-    "tmp/windows-11-23h2/autounattend.xml",
+    "tmp/cmderdev-10/autounattend.xml",
   ]
   guest_os_type     = "windows9-64"
   headless          = "${var.headless}"
@@ -172,7 +157,7 @@ source "vmware-iso" "cmderdev-10-amd64" {
   iso_url           = "${var.iso_url}"
   memory            = "${var.memory}"
   shutdown_command  = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
-  version           = "19"
+  version           = "${var.vmx_version}"
   vm_name           = "${var.vm_name}"
   vmx_data = {
     "RemoteDisplay.vnc.enabled" = "false"
