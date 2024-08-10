@@ -95,6 +95,7 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--graphicscontroller", "vboxsvga"]
       v.customize ["modifyvm", :id, "--memory", 4096]
       v.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      v.customize ["modifyvm", :id, "--vram", "128"]
     end
 
     cmderdev.vm.provision "shell", inline: $script_cmder
