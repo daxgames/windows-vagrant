@@ -122,7 +122,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "cmderdev-11-vmware" do |cmderdev|
     cmderdev.vm.box = "cmderdev-11-amd64"
-    cmderdev.vm.network "public_network", bridge: 'wlan0', type: "dhcp"
+    cmderdev.vm.network "public_network", type: "dhcp"
     # cmderdev.vm.box_version = "0.0.0"
 
     cmderdev.vm.provider "vmware_desktop" do |v|
